@@ -1,6 +1,6 @@
 {
   "creditor": "BalloonCo",
-  "current_balance_cents": 60000,
+  "creditor_balance_cents": 60000,
   "original_balance_cents": 60000,
   "settlement_pct": 0.5,
   "first_payment_date": "2026-01-31"

@@ -49,6 +49,11 @@ pytest -q
 Out of the box, `tests/test_smoke.py` passes and `tests/test_cases.py` fails —
 the latter is your target. Go beyond those four cases with your own tests.
 
+`tests/test_extra.py` is that "own tests" suite: token-pay and tier floors,
+the `max_segments` cap, exact-sum, same-day credit-before-debit ordering, a
+balance that hits exactly $0, the horizon limit, no-fee-before-first-payment,
+and both Part 2 minima (including a case where both guardrails reject).
+
 ## What to submit
 
 Your implementation, your tests, and a short README section describing:
@@ -97,9 +102,9 @@ Only ledger entries with `entry.date > client.as_of_date` are included in the si
 
 **offer_total** is what we owe the creditor:
 ```
-offer_total = round_half_up(offer.settlement_pct × offer.current_balance_cents)
+offer_total = round_half_up(offer.settlement_pct × offer.creditor_balance_cents)
 ```
-`current_balance_cents` is the *creditor* balance (what the client owes the creditor today).
+`creditor_balance_cents` is the *creditor* balance (what the client owes the creditor today).
 `settlement_pct` is typically < 1 (e.g. 0.50 = settle for 50 cents on the dollar).
 
 **program_fee** is what we (the settlement company) collect:

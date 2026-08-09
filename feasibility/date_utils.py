@@ -30,8 +30,13 @@ def is_end_of_month(d: date) -> bool:
     return d.day == last_day_of_month(d.year, d.month)
 
 
-def advance_month(d: date, is_eom: bool) -> date:
-    """Advance one month. If is_eom, snap to end-of-month; otherwise clamp to month length."""
+def advance_month(d: date, is_eom: bool, target_day: int) -> date:
+    """Advance one month. If is_eom, snap to end-of-month; otherwise clamp target_day
+    to the new month's length.
+
+    target_day is fixed for the whole cadence (the day-of-month of first_payment_date),
+    so a short month clamping it down doesn't affect later, longer months.
+    """
     month = d.month + 1
     year = d.year
     if month > 12:
@@ -40,7 +45,7 @@ def advance_month(d: date, is_eom: bool) -> date:
     if is_eom:
         day = last_day_of_month(year, month)
     else:
-        day = min(d.day, last_day_of_month(year, month))
+        day = min(target_day, last_day_of_month(year, month))
     return date(year, month, day)
 
 
@@ -54,10 +59,11 @@ def generate_cadence_dates(first_payment_date: date, horizon: date) -> List[date
     """
     dates: List[date] = []
     eom = is_end_of_month(first_payment_date)
+    target_day = first_payment_date.day
     current = first_payment_date
     while current <= horizon:
         dates.append(current)
-        current = advance_month(current, eom)
+        current = advance_month(current, eom, target_day)
     return dates
 
 

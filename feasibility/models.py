@@ -38,7 +38,7 @@ class Client:
 @dataclass
 class Offer:
     creditor: str
-    current_balance_cents: int
+    creditor_balance_cents: int
     original_balance_cents: int
     settlement_pct: float
     # Optional. When omitted, default to the end of the month of first_draft_date
@@ -139,7 +139,7 @@ def load_offer(path: str | Path) -> Offer:
     fpd = raw.get("first_payment_date")
     return Offer(
         creditor=raw["creditor"],
-        current_balance_cents=int(raw["current_balance_cents"]),
+        creditor_balance_cents=int(raw["creditor_balance_cents"]),
         original_balance_cents=int(raw["original_balance_cents"]),
         settlement_pct=float(raw["settlement_pct"]),
         first_payment_date=_d(fpd) if fpd else None,
@@ -172,7 +172,7 @@ def load_case(case_dir: str | Path) -> tuple[Client, Offer, CreditorRules]:
 
 
 def offer_total_cents(offer: Offer) -> int:
-    return round(offer.settlement_pct * offer.current_balance_cents)
+    return round(offer.settlement_pct * offer.creditor_balance_cents)
 
 
 def program_fee_cents(offer: Offer, rules: CreditorRules) -> int:

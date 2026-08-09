@@ -184,12 +184,11 @@ def _try_generate(
     Attempt to build a feasible schedule.
 
     Uses round_half_up (not Python's built-in round) to match the spec's
-    rounding requirement. offer.current_balance_cents is the creditor balance
-    (named current_balance_cents in the assignment's Offer model).
+    rounding requirement. offer.creditor_balance_cents is the creditor balance.
 
     Returns (feasible, schedule_entries, shape_name).
     """
-    offer_total = round_half_up(offer.settlement_pct * offer.current_balance_cents)
+    offer_total = round_half_up(offer.settlement_pct * offer.creditor_balance_cents)
     program_fee = round_half_up(rules.program_fee_pct * offer.original_balance_cents)
     first_payment_date = get_first_payment_date(client.first_draft_date, offer.first_payment_date)
     horizon = client.last_draft_date
@@ -214,10 +213,9 @@ def _try_generate(
     )
 
     # Shape is determined solely by the creditor flags (§6 of the assignment).
-    # Candidates are tried in reverse-k order so larger k (more installments,
-    # smaller early payments) is preferred when fee scores are equal.
+    # Candidates are tried in reverse-k order so larger k (more installments, smaller early payments) is preferred when fee scores are equal.
     if rules.even_pays:
-        entries = _try_candidates(best_k_even(max_installments, offer_total, rules), **common)
+        entries = _try_candidates(list(reversed(best_k_even(max_installments, offer_total, rules))), **common)
         if entries is not None:
             return True, entries, "even"
     elif rules.is_ballooning_allowed:
@@ -253,7 +251,7 @@ def _find_min_lump_sum(client: Client, offer: Offer, rules: CreditorRules) -> Fu
     else:
         lump_date = get_first_payment_date(client.first_draft_date, offer.first_payment_date)
 
-    offer_total = round_half_up(offer.settlement_pct * offer.current_balance_cents)
+    offer_total = round_half_up(offer.settlement_pct * offer.creditor_balance_cents)
     program_fee = round_half_up(rules.program_fee_pct * offer.original_balance_cents)
     max_installments = min(rules.max_payments, rules.max_terms)
     upper = offer_total + program_fee + max_installments * rules.bank_fee_cents + 1
@@ -284,7 +282,7 @@ def _find_min_monthly_increment(client: Client, offer: Offer, rules: CreditorRul
     draft_dates = _draft_dates(client)
     N = len(draft_dates)  # reported as num_drafts in the output
 
-    offer_total = round_half_up(offer.settlement_pct * offer.current_balance_cents)
+    offer_total = round_half_up(offer.settlement_pct * offer.creditor_balance_cents)
     program_fee = round_half_up(rules.program_fee_pct * offer.original_balance_cents)
     max_installments = min(rules.max_payments, rules.max_terms)
     upper = offer_total + program_fee + max_installments * rules.bank_fee_cents + 1
